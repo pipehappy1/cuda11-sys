@@ -36,7 +36,7 @@ fn main() {
             .whitelist_function("cu.*")
             .whitelist_type("[Cc][Uu].*")
             .default_alias_style(bindgen::AliasVariation::TypeAlias )
-            //.default_enum_style(bindgen::EnumVariation::Rust{non_exhaustive: true})
+            .default_enum_style(bindgen::EnumVariation::Consts)
             .generate()
             .expect("Unable to generate bindings");
 
