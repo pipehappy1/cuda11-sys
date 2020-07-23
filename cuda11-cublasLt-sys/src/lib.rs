@@ -1,13 +1,11 @@
-include!("cuda.rs");
+mod cublasLt;
 
-
+pub use cublasLt::*;
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cudaMemcpyKind;
-    use crate::cudaError;
 
     fn checkCudaStatus(status: cudaError_t ) {
         if status != cudaError::cudaSuccess {
@@ -93,15 +91,16 @@ mod tests {
                 let mut returnedResults: i32 = 0;
                 //let mut heuristicResult: *mut cublasLtMatmulHeuristicResult_t = std::ptr::null_mut();
                 //let mut heuristicResult: Vec<cublasLtMatmulHeuristicResult_t> = vec![std::mem::MaybeUninit::uninit(); 1];
-                let mut heuristicResult: cublasLtMatmulHeuristicResult_t = cublasLtMatmulHeuristicResult_t {
-                    algo: cublasLtMatmulAlgo_t {
-                        data: [0; 8usize],
-                    },
-                    workspaceSize: 0,
-                    state: 0,
-                    wavesCount: 0.,
-                    reserved: [0; 4],
-                };
+                //let mut heuristicResult: cublasLtMatmulHeuristicResult_t = cublasLtMatmulHeuristicResult_t {
+                //    algo: cublasLtMatmulAlgo_t {
+                //        data: [0; 8usize],
+                //    },
+                //    workspaceSize: 0,
+                //    state: 0,
+                //    wavesCount: 0.,
+                //    reserved: [0; 4],
+                //};
+                let mut heuristicResult: cublasLtMatmulHeuristicResult_t = std::mem::uninitialized();
                 
                 checkCublasStatus(cublasLtMatmulDescCreate(&mut operationDesc as *mut _ as *mut _, cublasComputeType_t_CUBLAS_COMPUTE_32F, cudaDataType_t::CUDA_R_32F));
                 checkCublasStatus(cublasLtMatmulDescSetAttribute(&mut operationDesc as *mut _ as *mut _, cublasLtMatmulDescAttributes_t_CUBLASLT_MATMUL_DESC_TRANSA, &cublasOperation_t_CUBLAS_OP_N as *const _ as *const _, std::mem::size_of::<cublasOperation_t>()));

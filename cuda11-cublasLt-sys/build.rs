@@ -30,7 +30,7 @@ fn main() {
             .generate()
             .expect("Unable to generate bindings");
 
-        let out_path = PathBuf::from("src").join("cuda.rs");
+        let out_path = PathBuf::from("src").join("cublasLt.rs");
         
         bindings
             .write_to_file(out_path)
