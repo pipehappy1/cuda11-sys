@@ -18,6 +18,15 @@ fn main() {
         
         let bindings = bindgen::Builder::default()
             .rust_target(bindgen::RustTarget::Stable_1_40)
+            .raw_line(
+                r"
+//! Defines the FFI for CUDA runtime.
+//!
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+            ",
+            )
             .ctypes_prefix("::libc")
             .size_t_is_usize(true)
             .clang_arg("-I")
@@ -27,6 +36,7 @@ fn main() {
             .whitelist_function("cu.*")
             .whitelist_type("[Cc][Uu].*")
             .default_alias_style(bindgen::AliasVariation::TypeAlias )
+            //.default_enum_style(bindgen::EnumVariation::Rust{non_exhaustive: true})
             .generate()
             .expect("Unable to generate bindings");
 
