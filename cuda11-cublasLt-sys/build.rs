@@ -4,7 +4,7 @@ fn main() {
     println!("cargo:include={}", "/usr/local/cuda/include");
     println!("cargo:rustc-link-search=native={}", "/usr/local/cuda/lib64");
     println!("cargo:rustc-link-lib=dylib={}", "cublasLt");
-    println!("cargo:rustc-link-lib=dylib={}", "cudart");
+    //println!("cargo:rustc-link-lib=dylib={}", "cudart");
     //println!("cargo:rustc-link-lib=dylib={}", "cublas");
     println!("cargo:rerun-if-changed=build.rs");
 

@@ -6,9 +6,10 @@ pub use cublasLt::*;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use cuda11_cudart_sys::{self, cudaMalloc, cudaStreamCreate, cudaMemcpyAsync, cudaStreamSynchronize, cudaFree, cudaStreamDestroy, cudaMemcpyKind};
 
-    fn checkCudaStatus(status: cudaError_t ) {
-        if status != cudaError::cudaSuccess {
+    fn checkCudaStatus(status: cuda11_cudart_sys::cudaError_t ) {
+        if status != cuda11_cudart_sys::cudaError::cudaSuccess {
             print!("cuda API failed with status \n");
             panic!();
         }
@@ -57,7 +58,7 @@ mod tests {
                 checkCudaStatus(cudaMalloc(&mut biasDev as *mut _ as *mut _, m * N * std::mem::size_of::<f32>()));
                 checkCudaStatus(cudaMalloc(&mut workspace as *mut _ as *mut _, 1024 * 1024 * 4));
                 
-                checkCudaStatus(cudaStreamCreate(&mut stream as *mut _));
+                checkCudaStatus(cudaStreamCreate(&mut stream as *mut _ as _));
             }
 
             {
@@ -71,9 +72,9 @@ mod tests {
                     biasHost[i] = (i + 1) as f32;
                 }
 
-                checkCudaStatus(cudaMemcpyAsync(Adev as *mut _, Ahost.as_ptr() as *mut _, Ahost.len() * std::mem::size_of::<f32>(), cudaMemcpyKind::cudaMemcpyHostToDevice, stream));
-                checkCudaStatus(cudaMemcpyAsync(Bdev as *mut _, Bhost.as_ptr() as *mut _, Bhost.len() * std::mem::size_of::<f32>(), cudaMemcpyKind::cudaMemcpyHostToDevice, stream));
-                checkCudaStatus(cudaMemcpyAsync(biasDev as *mut _, biasHost.as_ptr() as *mut _, biasHost.len() * std::mem::size_of::<f32>(), cudaMemcpyKind::cudaMemcpyHostToDevice, stream));
+                checkCudaStatus(cudaMemcpyAsync(Adev as *mut _, Ahost.as_ptr() as *mut _, Ahost.len() * std::mem::size_of::<f32>(), cudaMemcpyKind::cudaMemcpyHostToDevice, stream as _));
+                checkCudaStatus(cudaMemcpyAsync(Bdev as *mut _, Bhost.as_ptr() as *mut _, Bhost.len() * std::mem::size_of::<f32>(), cudaMemcpyKind::cudaMemcpyHostToDevice, stream as _));
+                checkCudaStatus(cudaMemcpyAsync(biasDev as *mut _, biasHost.as_ptr() as *mut _, biasHost.len() * std::mem::size_of::<f32>(), cudaMemcpyKind::cudaMemcpyHostToDevice, stream as _));
                 
             }
 
@@ -145,11 +146,11 @@ mod tests {
             }
 
             {
-                checkCudaStatus(cudaMemcpyAsync(Chost.as_ptr() as *mut _, Cdev as *mut _, Chost.len() * std::mem::size_of::<f32>(), cudaMemcpyKind::cudaMemcpyDeviceToHost, stream));
+                checkCudaStatus(cudaMemcpyAsync(Chost.as_ptr() as *mut _, Cdev as *mut _, Chost.len() * std::mem::size_of::<f32>(), cudaMemcpyKind::cudaMemcpyDeviceToHost, stream as _));
                 println!("chost: {:?}", Chost);
             }
 
-            cudaStreamSynchronize(stream);
+            cudaStreamSynchronize(stream as _);
 
             {
                 checkCublasStatus(cublasLtDestroy(lthandle));
@@ -158,7 +159,7 @@ mod tests {
                 checkCudaStatus(cudaFree(Cdev as _));
                 checkCudaStatus(cudaFree(biasDev as _));
                 checkCudaStatus(cudaFree(workspace as _));
-                checkCudaStatus(cudaStreamDestroy(stream));
+                checkCudaStatus(cudaStreamDestroy(stream as _));
             }
         }
 
