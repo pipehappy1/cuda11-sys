@@ -4,5 +4,6 @@ members = [
     "cuda11-cuda-sys",
     "cuda11-cudart-sys",
     "cuda11-cublasLt-sys",
+    "cuda11-cutensor-sys",
 ]
 
