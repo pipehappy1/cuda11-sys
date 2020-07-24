@@ -41,8 +41,8 @@ mod tests {
 
             let alpha: f32 = 1.0;
 
-            let extent: Vec<i64> = vec![2, 2];
-            let elems: usize = 4;
+            let extent: Vec<i64> = vec![10, 3];
+            let elems: usize = 10*3;
 
             let sizeA = std::mem::size_of::<f32>()*elems;
             let sizeB = std::mem::size_of::<f32>()*elems;
@@ -69,7 +69,7 @@ mod tests {
                                            extent.as_ptr(),
                                            std::ptr::null(),/*stride*/
                                            cudaDataType_t::CUDA_C_32F,
-                                           cutensorOperator_t_CUTENSOR_OP_SIGMOID));
+                                           cutensorOperator_t_CUTENSOR_OP_IDENTITY));
             checkCutensorStatus(cutensorInitTensorDescriptor( &mut handle,
                                            &mut descB,
                                            2,
@@ -93,6 +93,7 @@ mod tests {
                                 stream
             ));
 
+            cudaStreamSynchronize(stream as _);
 
             checkCudaStatus(cudaMemcpyAsync(Ahost.as_mut_ptr() as *mut _, A_d as *mut _, sizeA, cudaMemcpyKind::cudaMemcpyDeviceToHost, stream as _));
             checkCudaStatus(cudaMemcpyAsync(Bhost.as_mut_ptr() as *mut _, B_d as *mut _, sizeB, cudaMemcpyKind::cudaMemcpyDeviceToHost, stream as _));
