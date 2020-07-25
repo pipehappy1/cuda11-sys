@@ -53,10 +53,10 @@ mod tests {
             checkCudaStatus(cudaMalloc(&mut B_d as *mut _ as *mut _, sizeB));
 
             let mut Ahost: Vec<f32> = vec![0. ; elems];
+            let mut Bhost: Vec<f32> = vec![0. ; elems];
             for i in 0..elems {
                 Ahost[i] = i as f32 + 1.0;
             }
-            let mut Bhost: Vec<f32> = vec![0. ; elems];
 
             checkCudaStatus(cudaMemcpyAsync(A_d as *mut _, Ahost.as_ptr() as *mut _, sizeA, cudaMemcpyKind::cudaMemcpyHostToDevice, stream as _));
 
@@ -68,14 +68,14 @@ mod tests {
                                            2,
                                            extent.as_ptr(),
                                            std::ptr::null(),/*stride*/
-                                           cudaDataType_t::CUDA_C_32F,
+                                           cudaDataType_t::CUDA_R_32F,
                                            cutensorOperator_t_CUTENSOR_OP_IDENTITY));
             checkCutensorStatus(cutensorInitTensorDescriptor( &mut handle,
                                            &mut descB,
                                            2,
                                            extent.as_ptr(),
                                            std::ptr::null(),/*stride*/
-                                           cudaDataType_t::CUDA_C_32F,
+                                           cudaDataType_t::CUDA_R_32F,
                                            cutensorOperator_t_CUTENSOR_OP_IDENTITY));
 
             let modeA: Vec<i32> = vec![32, 33];
@@ -89,7 +89,7 @@ mod tests {
                                 B_d as _,
                                 &descB as _,
                                 modeB.as_ptr(),
-                                cudaDataType_t::CUDA_C_32F,
+                                cudaDataType_t::CUDA_R_32F,
                                 stream
             ));
 
