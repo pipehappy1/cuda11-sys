@@ -97,23 +97,123 @@ mod tests {
                     a: 0.,
                 }
             }
-            fn forward(&self, input: &CudaTensor) -> CudaTensor {
+            fn forward(&self,
+                       input: &CudaTensor,
+                       filter: &CudaTensor,
+                       alpha: f32,
+                       beta: f32,
+            ) -> CudaTensor {
+                unsafe {
+
+                    let mut cudnnHandle: cudnnHandle_t = std::ptr::null_mut();
+                    cudnnCreate(&mut cudnnHandle);
+
+                    let mut srcTensorDesc: cudnnTensorDescriptor_t;
+                    let mut dstTensorDesc: cudnnTensorDescriptor_t;
+                    let mut biasTensorDesc: cudnnTensorDescriptor_t;
+
+                    let mut filterDesc: cudnnFilterDescriptor_t;
+
+                    let mut  convDesc: cudnnConvolutionDescriptor_t;
+
+                    cudnnCreateTensorDescriptor(&srcTensorDesc as *mut _ as _);
+                    cudnnCreateTensorDescriptor(&dstTensorDesc as *mut _ as _);
+                    cudnnCreateTensorDescriptor(&biasTensorDesc as *mut _ as _);
+
+                    cudnnCreateFilterDescriptor(&filterDesc as *mut _ as _);
+
+                    cudnnCreateConvolutionDescriptor(&convDesc as *mut _ as _);
+
+                    cudnnSetFilterNdDescriptor(filterDesc,
+                                              dataType,
+                                              CUDNN_TENSOR_NCHW,
+                                              tensorDims,
+                                               filterDimA);
+
+                    cudnnSetConvolutionNdDescriptor(convDesc,
+                                                    convDims,
+                                                    padA,
+                                                    filterStrideA,
+                                                    upscaleA,
+                                                    CUDNN_CROSS_CORRELATION,
+                                                    convDataType);
+
+                    cudnnGetConvolutionNdForwardOutputDim(convDesc,
+                                                          srcTensorDesc,
+                                                          filterDesc,
+                                                          tensorDims,
+                                                          tensorOuputDimA);
+
+                    setTensorDesc(dstTensorDesc, tensorFormat, dataType, n, c, h, w);
+
+                    cudnnFindConvolutionForwardAlgorithm(cudnnHandle, 
+                                                         srcTensorDesc,
+                                                         filterDesc,
+                                                         convDesc,
+                                                         dstTensorDesc,
+                                                         requestedAlgoCount,
+                                                         &returnedAlgoCount,
+                                                         results);
+
+                    cudnnGetConvolutionForwardWorkspaceSize(cudnnHandle,
+                                                            srcTensorDesc,
+                                                            filterDesc,
+                                                            convDesc,
+                                                            dstTensorDesc,
+                                                            algo,
+                                                            &sizeInBytes);
+
+                    cudaMalloc(&workSpace,sizeInBytes);
+                    
+                    cudnnConvolutionForward(cudnnHandle,
+                                            &alpha as *const _ as _,
+                                            srcTensorDesc,
+                                            input.device_data as _,
+                                            filterDesc,
+                                            filter.device_data as _,
+                                            convDesc,
+                                            algo,
+                                            workSpace,
+                                            sizeInBytes,
+                                            &beta as *const _ as _,
+                                            dstTensorDesc,
+                                            *dstData);
+
+                    cudnnDestroyConvolutionDescriptor(convDesc);
+
+                    cudnnDestroyFilterDescriptor(filterDesc);
+                    
+                    cudnnDestroyTensorDescriptor(srcTensorDesc);
+                    cudnnDestroyTensorDescriptor(dstTensorDesc);
+                    cudnnDestroyTensorDescriptor(biasTensorDesc);
+                    
+                    cudnnDestroy(cudnnHandle);
+                }
                 CudaTensor::new()
             }
         }
 
         unsafe {
+
+            println!("cudnn version {:?} compiled against cudart version {:?}",
+                     cudnnGetVersion(),
+                     cudnnGetCudartVersion());
             
             let mut stream: cudaStream_t = std::ptr::null_mut();
             checkCudaStatus(cudaStreamCreate(&mut stream as *mut _ as _));
+
+
             
             let mut input = CudaTensor::new_raw(&vec![1., 2., 3., 4., 5., 6., 7., 8., 9.], &vec![1, 1, 3, 3]);
+            let mut filter = CudaTensor::new_raw(&vec![1., 2., 3., 4., 5., 6., 7., 8., 9.], &vec![1, 1, 3, 3]);
             let mut conv = CudaConv::new();
-            let mut output = conv.forward(&input);
+            let mut output = conv.forward(&input, &filter, 1., 0.);
 
             input._sync();
             println!("{:?}", input);
 
+
+            
             cudaStreamSynchronize(stream as _);
             checkCudaStatus(cudaStreamDestroy(stream as _));
             
