@@ -3,7 +3,18 @@ name = "cuda11-cudnn-sys"
 version = "0.1.0"
 authors = ["yguan <yguan@example.com>"]
 edition = "2018"
+description = """
+cuda ffi
 
+
+"""
+documentation = "https://docs.rs/cuda11-cudnn-sys"
+homepage = "https://github.com/pipehappy1/cuda11-sys"
+repository = "https://github.com/pipehappy1/cuda11-sys"
+readme = "README.md"
+license = "MIT"
+keywords = ["machine-learning", "neural-network", "deep-learning"]
+exclude = ["/dev/**"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 # links = "cuda"
