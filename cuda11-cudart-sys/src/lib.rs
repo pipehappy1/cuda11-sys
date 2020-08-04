@@ -3,7 +3,7 @@ mod cudart;
 pub use crate::cudart::*;
 
 
-fn checkCudaStatus(status: cudaError_t ) {
+pub fn check_cuda_status(status: cudaError_t ) {
     if status != cudaError::cudaSuccess {
         print!("cuda API failed with status \n");
         panic!();
