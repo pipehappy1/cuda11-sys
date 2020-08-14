@@ -2,6 +2,13 @@ mod cutensor;
 
 pub use cutensor::*;
 
+pub fn check_cutensor_status(status: cutensorStatus_t ) {
+    if status != cutensorStatus_t_CUTENSOR_STATUS_SUCCESS {
+        print!("cuda API failed with status {:?}\n", status);
+        panic!();
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
